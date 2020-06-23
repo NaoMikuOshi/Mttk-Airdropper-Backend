@@ -1,8 +1,12 @@
-import { Controller, Post, Param, NotImplementedException, Get, Put, ConflictException } from '@nestjs/common';
+import { Controller, Post, Body, Param, NotImplementedException, Get, Put, ConflictException } from '@nestjs/common';
+import { AirdropService } from './airdrop.service';
+import { CreateAirdropDto } from './dto/create-airdrop.dto';
 
 // @todo: wait for matataki have a virtual account API to continue...
 @Controller('airdrop')
 export class AirdropController {
+    constructor(private readonly airdropService: AirdropService) {}
+
 
     @Get('/:cashtag')
     getAirdropDetail(@Param('cashtag') cashtag: string) {
@@ -15,8 +19,8 @@ export class AirdropController {
         throw new NotImplementedException();
     }
 
-    @Put('/:cashtag')
-    createNewAirdrop(@Param('cashtag') cashtag: string) {
+    @Put()
+    createNewAirdrop(@Body() createAirdropDto: CreateAirdropDto) {
         // @todo: wait for matataki have a virtual account API to continue...
         const isCashtagAlreadyExist = false;
         if (isCashtagAlreadyExist) {
@@ -24,6 +28,8 @@ export class AirdropController {
                 "Cashtag already exist, please try another cashtag or go random"
             );
         }
-        throw new NotImplementedException();
+        console.log('createAirdropDto', createAirdropDto)
+        // throw new NotImplementedException();
+        return this.airdropService.create(createAirdropDto)
     }
 }
