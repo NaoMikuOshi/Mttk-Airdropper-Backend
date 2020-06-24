@@ -79,19 +79,23 @@ export class AirdropController implements CrudController<AirdropList> {
     @Override()
     async createOne(
         @ParsedRequest() req: CrudRequest,
-        @ParsedBody() dto: AirdropList,
+        @ParsedBody() dto,
         @Headers('x-access-token') accessToken: string,
     ) {
-        console.log('testttttt', dto, accessToken);
-        
+        const balance = await this.service.balance(dto.tokenId, accessToken);
+        if (balance.code != 0 || balance.data <= 0) {
+            throw new BadRequestException('token not exist or balance = 0');
+        }
+        // to参数需要从accessToken中解出来
+        const currentUser = await this.authService.getUser(accessToken);
+        const owner = currentUser.data.id;
         const result = await this.service.airdrop(dto, accessToken)
         if (result.code === 0) {
-            return this.base.createOneBase(req, dto);
+            return this.base.createOneBase(req, { ...dto, owner });
         } else {
             throw new BadRequestException();
         }
     }
-
 
     @UseGuards(AuthGuard)
     @Post('/:hash_tag')
@@ -100,18 +104,35 @@ export class AirdropController implements CrudController<AirdropList> {
         @Headers('x-access-token') accessToken: string,
         @Body() dto,
     ) {
-        // @todo: wait for matataki have a virtual account API to continue...
-        // throw new NotImplementedException();
-        console.log(dto);
-        // todo: to参数需要从accessToken中解出来
+        // 判断项目是否过期
+        const isExpired = await this.service.isAirdropExpired(hash_tag);
+        if (isExpired) {
+            throw new BadRequestException('Airdrop Expired');
+        }
+        // to参数需要从accessToken中解出来
+        const currentUser = await this.authService.getUser(accessToken);
+        const to = currentUser.data.id;
 
-        const to = 1042;
-        const middleAccessToken = await this.authService.getAccessToken();
-        const result = await this.service.claim({
-            ...dto,
-            hash_tag
-        }, middleAccessToken)
-        return result
+        // 判断用户是否领取过
+        const alreadyGet = await this.service.alreadyGetAirdrop(to, hash_tag);
+        if (alreadyGet) {
+            throw new BadRequestException('Already Claim Airdrop')
+        }
+        // 均分获取amount
+        const amount = await this.service.getAirdropAmount(hash_tag);
+        if (amount <= 0) {
+            throw new BadRequestException('Airdrop Amount = 0')
+        } else {
+            const middleAccessToken = await this.authService.getAccessToken();
+            console.log(middleAccessToken);
+            const result = await this.service.claim({
+                ...dto,
+                hash_tag,
+                to,
+                amount
+            }, middleAccessToken.data)
+            return result
+        }
     }
 
 }
