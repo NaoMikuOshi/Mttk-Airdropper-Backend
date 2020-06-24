@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Headers } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AppService } from './app.service';
 import { VirtualAccountService } from './virtual-account/virtual-account.service';
@@ -12,8 +12,9 @@ export class AppController {
     return this.appService.getHello();
   }
   @Get('/ttt')
-  getAccess(): Observable<any> {
-    const access_token = this.virtualAccountService.getAccessToken();
+  async getAccess(@Headers('x-access-token') accessToken: string): Promise<any> {
+    const access_token = await this.virtualAccountService.getAccessToken();
+    console.log(access_token)
     return access_token;
   }
 }

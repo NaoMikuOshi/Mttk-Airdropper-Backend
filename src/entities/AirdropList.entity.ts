@@ -7,6 +7,9 @@ export class AirdropList {
   id: number;
 
   @Column()
+  title: string;
+
+  @Column()
   owner: number;
 
   @Column()
@@ -16,9 +19,6 @@ export class AirdropList {
   token_id: number;
 
   @Column()
-  amount: number;
-
-  @Column()
   quantity: number;
 
   @Column('timestamp with time zone', { nullable: false, default: () => 'CURRENT_TIMESTAMP' })
@@ -26,4 +26,7 @@ export class AirdropList {
   
   @Column()
   duration: number;
+
+  @Column()
+  amount: number;
 }

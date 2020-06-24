@@ -1,4 +1,5 @@
 import { HttpService, Injectable, NotImplementedException } from '@nestjs/common';
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { of, Observable } from 'rxjs'
 import { catchError, map, timeout } from 'rxjs/operators'
 
@@ -13,15 +14,12 @@ export class VirtualAccountService {
     deposit() {
 
     }
-    getAccessToken(): Observable<any> {
+    async getAccessToken() {
         const { TEMP_ACCOUNT, TEMP_PASSWORD } = process.env;
         return this.httpService
         .post('/login/account', {
             username: TEMP_ACCOUNT,
             password: TEMP_PASSWORD
-        }).pipe(
-            map(res => res.data.data),
-            catchError(error => of(`Bad Promise: ${error}`))
-        )
+        }).toPromise().then(res => res.data.data)
     }    
 }
