@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Headers, Param, NotImplementedException, Get, Put, ConflictException, UseGuards, BadRequestException } from '@nestjs/common';
 import { AirdropService } from './airdrop.service';
+import { AuthService } from '../auth/auth.service';
 import { CreateAirdropDto } from './dto/create-airdrop.dto';
 import { AirdropList } from '../entities/AirdropList.entity'
 import {
@@ -40,7 +41,10 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 })
 @Controller('airdrop')
 export class AirdropController implements CrudController<AirdropList> {
-    constructor(public service: AirdropService) {}
+    constructor(
+        public service: AirdropService,
+        public authService: AuthService,
+    ) {}
     /* constructor(private readonly airdropService: AirdropService) {}
 
 
@@ -87,6 +91,9 @@ export class AirdropController implements CrudController<AirdropList> {
             throw new BadRequestException();
         }
     }
+
+
+    @UseGuards(AuthGuard)
     @Post('/:hash_tag')
     async claim(
         @Param('hash_tag') hash_tag: string,
@@ -96,11 +103,14 @@ export class AirdropController implements CrudController<AirdropList> {
         // @todo: wait for matataki have a virtual account API to continue...
         // throw new NotImplementedException();
         console.log(dto);
-        
+        // todo: to参数需要从accessToken中解出来
+
+        const to = 1042;
+        const middleAccessToken = await this.authService.getAccessToken();
         const result = await this.service.claim({
             ...dto,
             hash_tag
-        }, accessToken)
+        }, middleAccessToken)
         return result
     }
 
