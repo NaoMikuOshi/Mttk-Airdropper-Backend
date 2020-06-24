@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, Param, NotImplementedException, Get, Put, ConflictException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Param, NotImplementedException, Get, Put, ConflictException, UseGuards, BadRequestException } from '@nestjs/common';
 import { AirdropService } from './airdrop.service';
 import { CreateAirdropDto } from './dto/create-airdrop.dto';
 import { AirdropList } from '../entities/AirdropList.entity'
@@ -73,15 +73,23 @@ export class AirdropController implements CrudController<AirdropList> {
     }
     @UseGuards(AuthGuard)
     @Override()
-    createOne(
+    async createOne(
         @ParsedRequest() req: CrudRequest,
         @ParsedBody() dto: AirdropList,
+        @Headers('x-access-token') accessToken: string,
     ) {
-        return this.base.createOneBase(req, dto);
+        console.log('testttttt', dto, accessToken);
+        
+        const result = await this.service.airdrop(dto, accessToken)
+        if (result.code === 0) {
+            return this.base.createOneBase(req, dto);
+        } else {
+            throw new BadRequestException();
+        }
     }
-    @Post('/:cash_tag')
+    @Post('/:hash_tag')
     async claim(
-        @Param('cash_tag') cash_tag: string,
+        @Param('hash_tag') hash_tag: string,
         @Headers('x-access-token') accessToken: string,
         @Body() dto,
     ) {
@@ -89,7 +97,10 @@ export class AirdropController implements CrudController<AirdropList> {
         // throw new NotImplementedException();
         console.log(dto);
         
-        const result = await this.service.transfer(dto, accessToken)
+        const result = await this.service.claim({
+            ...dto,
+            hash_tag
+        }, accessToken)
         return result
     }
 

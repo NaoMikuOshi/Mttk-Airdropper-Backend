@@ -5,12 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Transaction } from 'src/entities/Transaction.entity';
 import { VirtualAccount } from 'src/entities/VirtualAccount.entity';
 import { AirdropList } from 'src/entities/AirdropList.entity';
+import { ClaimLog } from 'src/entities/ClaimLog.entity';
 import { AuthModule } from '../auth/auth.module';
+import { ClaimModule } from '../claim/claim.module';
 
 @Module({
     imports: [
+        ClaimModule,
         AuthModule,
-        TypeOrmModule.forFeature([ VirtualAccount, Transaction, AirdropList ]) ],
+        TypeOrmModule.forFeature([ VirtualAccount, Transaction, AirdropList, ClaimLog ]) ],
     controllers: [ AirdropController ],
     providers: [ AirdropService ]
 })

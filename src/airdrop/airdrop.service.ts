@@ -39,32 +39,49 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { TypeOrmCrudService } from "@nestjsx/crud-typeorm";
 import { customAlphabet } from 'nanoid/async'
 import { AirdropList } from '../entities/AirdropList.entity'
+import { ClaimService } from '../claim/claim.service'
 
 @Injectable()
 export class AirdropService extends TypeOrmCrudService<AirdropList> {
   constructor(
     @InjectRepository(AirdropList) repo,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly claimService: ClaimService,
     ) {
     super(repo);
   }
   async createOne(req, dto) {
+    const { title, tokenId, amount, quantity, duration } = dto;
     let airdropItem = new AirdropList();
     const hash_tag = await this.genCharacterNumber(12);
     airdropItem.owner = 1111;
     airdropItem.hash_tag = hash_tag;
-    airdropItem.title = dto.title;
-    airdropItem.token_id = dto.tokenId;
-    airdropItem.amount = dto.amount;
-    airdropItem.quantity = dto.quantity;
-    airdropItem.duration = dto.duration;
+    airdropItem.title = title;
+    airdropItem.token_id = tokenId;
+    airdropItem.amount = amount;
+    airdropItem.quantity = quantity;
+    airdropItem.duration = duration;
     return this.repo.save(airdropItem)
   }
   async genCharacterNumber(length) {
     const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', length)
     return nanoid()
   }
-  async transfer(reqBody, access_token: string): Promise<any> {
+  async claim(reqBody, access_token: string): Promise<any> {
+    const { tokenId, to, amount, memo, hash_tag } = reqBody
+    const result = await this.transfer({tokenId, to, amount, memo}, access_token);
+    console.log(result);
+    if (result.code === 0) {
+      return this.claimService.createClaim({
+        uid: 1,
+        hash_tag,
+        amount,
+        token_id: tokenId,
+        tx_hash: result.data.tx_hash
+      })
+    }
+  }
+  async transfer(reqBody, access_token: string) {
     const { tokenId, to, amount, memo } = reqBody
     return this.httpService.post('/minetoken/transfer', {
       tokenId, to, amount, memo
@@ -73,5 +90,15 @@ export class AirdropService extends TypeOrmCrudService<AirdropList> {
         'x-access-token': access_token
       }
     }).toPromise().then(res => res.data)
-  } 
+  }
+  async airdrop(reqBody, access_token: string) {
+    const { tokenId, amount, title } = reqBody
+    const memo = title;
+    const to = Number(process.env.TEMP_UID);
+    console.log('airdrop start: ', {tokenId, to, amount, memo}, access_token);
+    
+    const result = await this.transfer({tokenId, to, amount, memo}, access_token);
+    console.log(result)
+    return result
+  }
 }

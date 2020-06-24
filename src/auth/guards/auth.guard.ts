@@ -14,7 +14,6 @@ export class AuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const access_token = request.headers['x-access-token']
         const result = await this.authService.getUser(access_token)
-        console.log(result);
         
         if (result.code === 0) {
             return true
