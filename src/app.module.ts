@@ -4,6 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
 import { AirdropModule } from './airdrop/airdrop.module';
+import { AuthModule } from './auth/auth.module';
+import { SharedModule } from './share.module';
+import { ClaimModule } from './claim/claim.module';
+
 require('dotenv').config();
 
 @Module({
@@ -19,7 +23,7 @@ require('dotenv').config();
       synchronize: true,
       autoLoadEntities: true,
     }),
-    VirtualAccountModule, AirdropModule],
+    VirtualAccountModule, AirdropModule, AuthModule, SharedModule, ClaimModule],
   controllers: [AppController],
   providers: [AppService],
 })
