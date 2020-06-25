@@ -42,11 +42,13 @@ import { AirdropList } from '../entities/AirdropList.entity'
 import { ClaimService } from '../claim/claim.service'
 import { Decimal } from 'decimal.js';
 import * as moment from 'moment';
+import { Repository } from "typeorm";
 
 @Injectable()
 export class AirdropService extends TypeOrmCrudService<AirdropList> {
   constructor(
-    @InjectRepository(AirdropList) repo,
+    @InjectRepository(AirdropList)
+    readonly repo: Repository<AirdropList>,
     private readonly httpService: HttpService,
     private readonly claimService: ClaimService,
     ) {
