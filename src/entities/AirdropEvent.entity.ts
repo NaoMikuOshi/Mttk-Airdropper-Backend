@@ -1,8 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class AirdropList {
-
+export class AirdropEvent {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -21,9 +20,12 @@ export class AirdropList {
   @Column()
   quantity: number;
 
-  @Column('timestamp with time zone', { nullable: false, default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamp with time zone', {
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
-  
+
   @Column()
   duration: number;
 
