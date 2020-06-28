@@ -25,9 +25,9 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
   async createOne(req, dto) {
     const { title, tokenId, amount, quantity, duration, owner } = dto;
     let airdropItem = new AirdropEvent();
-    const hash_tag = await this.genCharacterNumber(12);
+    const cashtag = await this.genCharacterNumber(12);
     airdropItem.owner = owner;
-    airdropItem.hash_tag = hash_tag;
+    airdropItem.cashtag = cashtag;
     airdropItem.title = title;
     airdropItem.token_id = tokenId;
     airdropItem.amount = amount;
@@ -45,8 +45,8 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
 
   async claim(reqBody, access_token: string) {
     // @todo: needs a rewrite, use scheduled tasks to avoid transaction have race condition
-    const { to, amount, memo, hash_tag } = reqBody;
-    const airdropResult = await this.repo.findOne({ hash_tag });
+    const { to, amount, memo, cashtag } = reqBody;
+    const airdropResult = await this.repo.findOne({ cashtag });
     const tokenId = airdropResult.token_id;
     const result = await this.transfer(
       { tokenId, to, amount, memo },
@@ -58,7 +58,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     }
     return this.claimService.createClaim({
       uid: to,
-      hash_tag,
+      cashtag,
       amount,
       token_id: tokenId,
       tx_hash: result.data.tx_hash,
@@ -96,20 +96,20 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     console.log('transfer end result: ', result);
     return result;
   }
-  async getAirdropAmount(hash_tag): Promise<Number> {
+  async getAirdropAmount(cashtag): Promise<Number> {
     /* const claimLogRepoResult = await this.claimLogRepo
     .createQueryBuilder('claimLog')
     .select(' SUM(amount) as total ')
-    .where('hash_tag = :hash_tag')
-    .setParameters({ hash_tag })
+    .where('cashtag = :cashtag')
+    .setParameters({ cashtag })
     .getMany(); */
-    const airdropResult = await this.repo.findOne({ hash_tag });
+    const airdropResult = await this.repo.findOne({ cashtag });
     if (!airdropResult) return 0;
     const claimLogResult = await this.repo.query(
       'SELECT SUM(amount) as total FROM ' +
         process.env.DB_SCHEMA +
-        '.claim_log WHERE hash_tag = $1;',
-      [hash_tag],
+        '.claim_log WHERE cashtag = $1;',
+      [cashtag],
     );
     const claimTotal = claimLogResult[0].total || 0;
     const { amount, quantity } = airdropResult;
@@ -120,15 +120,15 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     if (rest < equally) return rest;
     return equally;
   }
-  async isAirdropExpired(hash_tag): Promise<Boolean> {
-    const airdropResult = await this.repo.findOne({ hash_tag });
+  async isAirdropExpired(cashtag): Promise<Boolean> {
+    const airdropResult = await this.repo.findOne({ cashtag });
     if (!airdropResult) return false;
     const { created_at, duration } = airdropResult;
     const expiredTime = moment(created_at).add(duration, 'd');
     return moment().isAfter(expiredTime);
   }
-  async alreadyGetAirdrop(uid, hash_tag) {
-    const airdropResult = await this.claimService.findOne({ uid, hash_tag });
+  async alreadyGetAirdrop(uid, cashtag) {
+    const airdropResult = await this.claimService.findOne({ uid, cashtag });
     if (airdropResult) {
       return true;
     } else {

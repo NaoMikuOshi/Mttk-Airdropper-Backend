@@ -24,7 +24,7 @@ export class ClaimService extends TypeOrmCrudService<ClaimLog> {
   async createClaim(dto) {
     let item = new ClaimLog();
     item.uid = dto.uid;
-    item.hash_tag = dto.hash_tag;
+    item.cashtag = dto.cashtag;
     item.amount = dto.amount;
     item.token_id = dto.token_id;
     item.tx_hash = dto.tx_hash;

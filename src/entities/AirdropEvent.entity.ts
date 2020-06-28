@@ -12,7 +12,7 @@ export class AirdropEvent {
   owner: number;
 
   @Column()
-  hash_tag: string;
+  cashtag: string;
 
   @Column()
   token_id: number;

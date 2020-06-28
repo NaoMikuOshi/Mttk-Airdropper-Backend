@@ -37,8 +37,8 @@ import { AuthGuard } from '../auth/guards/auth.guard';
     only: ['getOneBase', 'getManyBase', 'createOneBase'],
   },
   params: {
-    hash_tag: {
-      field: 'hash_tag',
+    cashtag: {
+      field: 'cashtag',
       type: 'string',
       primary: true,
     },
@@ -109,14 +109,14 @@ export class AirdropController implements CrudController<AirdropEvent> {
   }
 
   @UseGuards(AuthGuard)
-  @Post('/:hash_tag')
+  @Post('/:cashtag')
   async claim(
-    @Param('hash_tag') hash_tag: string,
+    @Param('cashtag') cashtag: string,
     @Headers('x-access-token') accessToken: string,
     @Body() dto,
   ) {
     // 判断项目是否过期
-    const isExpired = await this.service.isAirdropExpired(hash_tag);
+    const isExpired = await this.service.isAirdropExpired(cashtag);
     if (isExpired) {
       throw new BadRequestException('Airdrop Expired');
     }
@@ -125,12 +125,12 @@ export class AirdropController implements CrudController<AirdropEvent> {
     const to = currentUser.data.id;
 
     // 判断用户是否领取过
-    const alreadyGet = await this.service.alreadyGetAirdrop(to, hash_tag);
+    const alreadyGet = await this.service.alreadyGetAirdrop(to, cashtag);
     if (alreadyGet) {
       throw new BadRequestException('Already Claim Airdrop');
     }
     // 均分获取amount
-    const amount = await this.service.getAirdropAmount(hash_tag);
+    const amount = await this.service.getAirdropAmount(cashtag);
     if (amount <= 0) {
       throw new BadRequestException('Airdrop Amount = 0');
     } else {
@@ -139,7 +139,7 @@ export class AirdropController implements CrudController<AirdropEvent> {
       const result = await this.service.claim(
         {
           ...dto,
-          hash_tag,
+          cashtag,
           to,
           amount,
         },

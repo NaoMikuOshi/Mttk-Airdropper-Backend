@@ -2,7 +2,6 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class ClaimLog {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -10,7 +9,7 @@ export class ClaimLog {
   uid: number;
 
   @Column()
-  hash_tag: string;
+  cashtag: string;
 
   @Column()
   amount: number;
@@ -21,6 +20,9 @@ export class ClaimLog {
   @Column()
   tx_hash: string;
 
-  @Column('timestamp with time zone', { nullable: false, default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamp with time zone', {
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 }
