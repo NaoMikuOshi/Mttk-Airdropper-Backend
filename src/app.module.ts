@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
@@ -7,6 +8,7 @@ import { AirdropModule } from './airdrop/airdrop.module';
 import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './share.module';
 import { ClaimModule } from './claim/claim.module';
+import { CronTasksModule } from './cron-tasks/cron-tasks.module';
 
 require('dotenv').config();
 
@@ -23,7 +25,14 @@ require('dotenv').config();
       synchronize: true,
       autoLoadEntities: true,
     }),
-    VirtualAccountModule, AirdropModule, AuthModule, SharedModule, ClaimModule],
+    ScheduleModule.forRoot(),
+    VirtualAccountModule,
+    AirdropModule,
+    AuthModule,
+    SharedModule,
+    ClaimModule,
+    CronTasksModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
