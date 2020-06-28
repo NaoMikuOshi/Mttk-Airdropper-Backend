@@ -34,7 +34,7 @@ export class AirdropService {
     }
 } */
 
-import { HttpService, Injectable } from "@nestjs/common";
+import { HttpService, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TypeOrmCrudService } from "@nestjsx/crud-typeorm";
 import { customAlphabet } from 'nanoid/async'
@@ -71,21 +71,24 @@ export class AirdropService extends TypeOrmCrudService<AirdropList> {
     const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', length)
     return nanoid()
   }
-  async claim(reqBody, access_token: string): Promise<any> {
+
+  async claim(reqBody, access_token: string) {
+    // @todo: needs a rewrite, use scheduled tasks to avoid transaction have race condition
     const { to, amount, memo, hash_tag } = reqBody
     const airdropResult = await this.repo.findOne({ hash_tag })
     const tokenId = airdropResult.token_id;
     const result = await this.transfer({tokenId, to, amount, memo}, access_token);
     console.log('transfer end result: ', result);
-    if (result.code === 0) {
-      return this.claimService.createClaim({
-        uid: to,
-        hash_tag,
-        amount,
-        token_id: tokenId,
-        tx_hash: result.data.tx_hash
-      })
+    if (result.code !== 0) {
+      throw new InternalServerErrorException("Error happened in transfer")
     }
+    return this.claimService.createClaim({
+      uid: to,
+      hash_tag,
+      amount,
+      token_id: tokenId,
+      tx_hash: result.data.tx_hash
+    })
   }
   async transfer(reqBody, access_token: string) {
     console.log('transfer start params: ', reqBody, access_token);
