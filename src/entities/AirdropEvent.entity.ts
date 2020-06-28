@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { ClaimLog } from './ClaimLog.entity';
 
 @Entity()
 export class AirdropEvent {
@@ -28,4 +29,7 @@ export class AirdropEvent {
 
   @Column()
   amount: number;
+
+  @OneToMany((type) => ClaimLog, (log) => log.event)
+  claimLogs: ClaimLog[];
 }

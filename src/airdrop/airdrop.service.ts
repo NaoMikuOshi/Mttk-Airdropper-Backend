@@ -55,13 +55,16 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     if (result.code !== 0) {
       throw new InternalServerErrorException('Error happened in transfer');
     }
-    return this.claimService.createClaim({
-      uid: to,
-      cashtag,
-      amount,
-      token_id: tokenId,
-      tx_hash: result.data.tx_hash,
-    });
+    return this.claimService.createClaim(
+      {
+        uid: to,
+        cashtag,
+        amount,
+        token_id: tokenId,
+        tx_hash: result.data.tx_hash,
+      },
+      airdropResult,
+    );
   }
   async transfer(reqBody, access_token: string) {
     console.log('transfer start params: ', reqBody, access_token);

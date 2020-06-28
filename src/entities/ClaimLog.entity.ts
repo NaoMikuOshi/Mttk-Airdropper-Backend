@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { AirdropEvent } from './AirdropEvent.entity';
 
 @Entity()
 export class ClaimLog {
@@ -16,6 +17,9 @@ export class ClaimLog {
 
   @Column()
   token_id: number;
+
+  @ManyToOne((type) => AirdropEvent, (ae) => ae.claimLogs)
+  event: AirdropEvent;
 
   @Column()
   tx_hash: string;
