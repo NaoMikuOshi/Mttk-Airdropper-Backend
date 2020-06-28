@@ -1,13 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { VirtualAccount } from './VirtualAccount.entity';
 
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(type => VirtualAccount, va => va.transactions)
-  from: VirtualAccount;
 
   @Column()
   to: number;
@@ -17,4 +13,10 @@ export class Transaction {
 
   @Column()
   amount: string;
+
+  @Column({ default: 'pending' })
+  status: 'pending' | 'paid';
+
+  @Column()
+  txHash: string;
 }
