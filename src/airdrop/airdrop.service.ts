@@ -23,7 +23,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     super(repo);
   }
   async createOne(req, dto) {
-    const { title, tokenId, amount, quantity, duration, owner } = dto;
+    const { title, tokenId, amount, quantity, owner } = dto;
     let airdropItem = new AirdropEvent();
     const cashtag = await this.genCharacterNumber(12);
     airdropItem.owner = owner;
@@ -32,7 +32,6 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     airdropItem.token_id = tokenId;
     airdropItem.amount = amount;
     airdropItem.quantity = quantity;
-    airdropItem.duration = duration;
     return this.repo.save(airdropItem);
   }
   async genCharacterNumber(length) {
@@ -120,12 +119,9 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     if (rest < equally) return rest;
     return equally;
   }
-  async isAirdropExpired(cashtag): Promise<Boolean> {
-    const airdropResult = await this.repo.findOne({ cashtag });
-    if (!airdropResult) return false;
-    const { created_at, duration } = airdropResult;
-    const expiredTime = moment(created_at).add(duration, 'd');
-    return moment().isAfter(expiredTime);
+  // @todo: We are not implement this logic for now, will do this later;
+  async isAirdropExpired(cashtag: string): Promise<Boolean> {
+    return Promise.resolve(false);
   }
   async alreadyGetAirdrop(uid, cashtag) {
     const airdropResult = await this.claimService.findOne({ uid, cashtag });

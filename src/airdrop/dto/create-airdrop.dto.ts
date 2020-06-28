@@ -12,7 +12,4 @@ export class CreateAirdropDto {
 
   @IsNumber()
   readonly amount: number;
-  
-  @IsInt()
-  readonly duration: number;
 }

@@ -27,8 +27,5 @@ export class AirdropEvent {
   created_at: Date;
 
   @Column()
-  duration: number;
-
-  @Column()
   amount: number;
 }
