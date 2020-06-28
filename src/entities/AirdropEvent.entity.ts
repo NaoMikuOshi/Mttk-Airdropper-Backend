@@ -7,6 +7,9 @@ export class AirdropEvent {
   id: number;
 
   @Column()
+  type: 'equal' | 'random';
+
+  @Column()
   title: string;
 
   @Column()
