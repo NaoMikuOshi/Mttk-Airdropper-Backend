@@ -56,33 +56,6 @@ export class AirdropController implements CrudController<AirdropEvent> {
     public service: AirdropService,
     public authService: AuthService,
   ) {}
-  /* constructor(private readonly airdropService: AirdropService) {}
-
-
-    @Get('/:cashtag')
-    getAirdropDetail(@Param('cashtag') cashtag: string) {
-        throw new NotImplementedException();
-    }
-
-    @Post('/:cashtag')
-    claim(@Param('cashtag') cashtag: string) {
-        // @todo: wait for matataki have a virtual account API to continue...
-        throw new NotImplementedException();
-    }
-
-    @Put()
-    createNewAirdrop(@Body() createAirdropDto: CreateAirdropDto) {
-        // @todo: wait for matataki have a virtual account API to continue...
-        const isCashtagAlreadyExist = false;
-        if (isCashtagAlreadyExist) {
-            throw new ConflictException(
-                "Cashtag already exist, please try another cashtag or go random"
-            );
-        }
-        console.log('createAirdropDto', createAirdropDto)
-        // throw new NotImplementedException();
-        return this.airdropService.create(createAirdropDto)
-    } */
   get base(): CrudController<AirdropEvent> {
     return this;
   }
