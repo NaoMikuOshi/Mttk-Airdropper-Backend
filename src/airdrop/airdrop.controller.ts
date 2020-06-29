@@ -107,8 +107,8 @@ export class AirdropController implements CrudController<AirdropEvent> {
     if (amount <= 0) {
       throw new BadRequestException('Airdrop Amount = 0');
     } else {
-      const middleAccessToken = await this.authService.getAccessToken();
-      console.log(middleAccessToken);
+      // const middleAccessToken = await this.authService.getAccessToken();
+      // console.log(middleAccessToken);
       const result = await this.service.claim(
         {
           ...dto,
@@ -116,7 +116,7 @@ export class AirdropController implements CrudController<AirdropEvent> {
           to,
           amount,
         },
-        middleAccessToken.data,
+        // middleAccessToken.data,
       );
       return result;
     }

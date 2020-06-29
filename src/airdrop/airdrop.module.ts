@@ -13,6 +13,7 @@ import { ClaimModule } from '../claim/claim.module';
     AuthModule,
     TypeOrmModule.forFeature([AirdropEvent, ClaimLog]),
   ],
+  exports: [AirdropService],
   controllers: [AirdropController],
   providers: [AirdropService],
 })

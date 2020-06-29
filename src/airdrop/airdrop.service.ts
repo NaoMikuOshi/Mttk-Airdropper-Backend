@@ -42,26 +42,25 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     return nanoid();
   }
 
-  async claim(reqBody, access_token: string) {
+  async claim(reqBody) {
     // @todo: needs a rewrite, use scheduled tasks to avoid transaction have race condition
     const { to, amount, memo, cashtag } = reqBody;
     const airdropResult = await this.repo.findOne({ cashtag });
     const tokenId = airdropResult.token_id;
-    const result = await this.transfer(
-      { tokenId, to, amount, memo },
-      access_token,
-    );
-    console.log('transfer end result: ', result);
-    if (result.code !== 0) {
-      throw new InternalServerErrorException('Error happened in transfer');
-    }
+    // We will put this in queue and run by cron, not here
+    // const result = await this.transfer(
+    //   { tokenId, to, amount, memo },
+    //   access_token,
+    // );
+    // Disabled transfer in claim()
+
     return this.claimService.createClaim(
       {
         uid: to,
         cashtag,
         amount,
         token_id: tokenId,
-        tx_hash: result.data.tx_hash,
+        tx_hash: null,
       },
       airdropResult,
     );
