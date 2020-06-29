@@ -75,7 +75,7 @@ export class AirdropController implements CrudController<AirdropEvent> {
     const owner = currentUser.data.id;
     const result = await this.service.airdrop(dto, accessToken);
     if (result.code === 0) {
-      return this.base.createOneBase(req, { ...dto, owner });
+      return this.base.createOneBase(req, { ...dto, type: 'equal', owner });
     } else {
       throw new BadRequestException();
     }

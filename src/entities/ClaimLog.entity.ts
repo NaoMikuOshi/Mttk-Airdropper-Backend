@@ -24,8 +24,8 @@ export class ClaimLog {
   @ManyToOne((type) => AirdropEvent, (ae) => ae.claimLogs)
   event: AirdropEvent;
 
-  @Column()
-  tx_hash: string;
+  @Column({ nullable: true })
+  tx_hash?: string;
 
   @Column('timestamp with time zone', {
     nullable: false,
