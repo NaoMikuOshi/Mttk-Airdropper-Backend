@@ -125,14 +125,19 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
   async isAirdropExpired(cashtag: string): Promise<Boolean> {
     return Promise.resolve(false);
   }
-  async alreadyGetAirdrop(uid, cashtag) {
-    const airdropResult = await this.claimService.findOne({ uid, cashtag });
+  async alreadyGetAirdrop(uid: number, cashtag: string) {
+    const airdropResult = await this.getClaimLogForUser(uid, cashtag);
     if (airdropResult) {
       return true;
     } else {
       return false;
     }
   }
+
+  getClaimLogForUser(uid: number, cashtag: string) {
+    return this.claimService.findOne({ uid, cashtag });
+  }
+
   // 获取用户余额
   async balance(tokenId, access_token: string) {
     return this.httpService

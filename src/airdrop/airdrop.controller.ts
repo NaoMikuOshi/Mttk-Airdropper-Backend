@@ -81,6 +81,20 @@ export class AirdropController implements CrudController<AirdropEvent> {
     }
   }
 
+  @Get('/:cashtag/isClaimed')
+  async checkIsClaimed(
+    @Param('cashtag') cashtag: string,
+    @Headers('x-access-token') accessToken?: string,
+  ) {
+    if (!accessToken) return { isClaimed: false }; // I do not know if you are not logined
+    const currentUser = await this.authService.getUser(accessToken);
+    const claimResult = await this.service.getClaimLogForUser(
+      currentUser.data.id,
+      cashtag,
+    );
+    return { isClaimed: Boolean(claimResult), claimResult };
+  }
+
   @UseGuards(AuthGuard)
   @Post('/:cashtag')
   async claim(
