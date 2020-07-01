@@ -1,4 +1,4 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { HttpService, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { ClaimLog } from '../entities/ClaimLog.entity';
@@ -18,6 +18,8 @@ import { AirdropEvent } from 'src/entities/AirdropEvent.entity';
 export class ClaimService extends TypeOrmCrudService<ClaimLog> {
   constructor(
     @InjectRepository(ClaimLog) repo: Repository<ClaimLog>,
+    @InjectRepository(ClaimLog)
+    private readonly aeRepo: Repository<AirdropEvent>,
     private readonly httpService: HttpService,
   ) {
     super(repo);
@@ -32,5 +34,12 @@ export class ClaimService extends TypeOrmCrudService<ClaimLog> {
     item.tx_hash = dto.tx_hash;
     item.event = event;
     return this.repo.save(item);
+  }
+
+  getClaimLogs(cashtag: string) {
+    return this.repo.find({
+      where: { cashtag },
+      order: { created_at: 'DESC' },
+    });
   }
 }

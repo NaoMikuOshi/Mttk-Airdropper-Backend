@@ -45,11 +45,6 @@ import { AuthGuard } from '../auth/guards/auth.guard';
   },
   query: {
     alwaysPaginate: true,
-    join: {
-      claimLogs: {
-        eager: true,
-      },
-    },
   },
 })
 @CrudAuth({
