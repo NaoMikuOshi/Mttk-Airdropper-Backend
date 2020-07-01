@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  RelationCount,
+} from 'typeorm';
 import { ClaimLog } from './ClaimLog.entity';
 
 @Entity()
@@ -35,4 +41,7 @@ export class AirdropEvent {
 
   @OneToMany((type) => ClaimLog, (log) => log.event)
   claimLogs: ClaimLog[];
+
+  @RelationCount((event: AirdropEvent) => event.claimLogs)
+  claimed: number;
 }
