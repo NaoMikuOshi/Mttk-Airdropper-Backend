@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './share.module';
 import { ClaimModule } from './claim/claim.module';
 import { CronTasksModule } from './cron-tasks/cron-tasks.module';
+import { UserModule } from './user/user.module';
 
 require('dotenv').config();
 
@@ -32,6 +33,7 @@ require('dotenv').config();
     SharedModule,
     ClaimModule,
     CronTasksModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
