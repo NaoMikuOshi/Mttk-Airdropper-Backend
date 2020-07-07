@@ -23,7 +23,7 @@ require('dotenv').config();
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       schema: process.env.DB_SCHEMA,
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
     }),
     ScheduleModule.forRoot(),
