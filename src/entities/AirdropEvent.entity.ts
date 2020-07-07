@@ -44,4 +44,7 @@ export class AirdropEvent {
 
   @RelationCount((event: AirdropEvent) => event.claimLogs)
   claimed: number;
+
+  @Column({ default: 'active' })
+  status: 'active' | 'stopped' | 'finished';
 }
