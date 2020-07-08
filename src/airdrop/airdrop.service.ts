@@ -102,13 +102,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     return airdrop.claimed >= airdrop.quantity;
   }
 
-  async getAirdropAmount(cashtag: string): Promise<Number> {
-    /* const claimLogRepoResult = await this.claimLogRepo
-    .createQueryBuilder('claimLog')
-    .select(' SUM(amount) as total ')
-    .where('cashtag = :cashtag')
-    .setParameters({ cashtag })
-    .getMany(); */
+  async getAirdropAmount(cashtag: string) {
     const airdropResult = await this.repo.findOne({ cashtag });
     if (!airdropResult) return 0;
     const claimTotal = await this.claimService.getTotalClaimedOf(cashtag);
