@@ -50,12 +50,10 @@ export class CronTasksService {
       return;
     }
     const result = await this.airdropService.transfer(
-      {
-        tokenId: notSentLog.token_id,
-        to: notSentLog.uid,
-        amount: notSentLog.amount,
-        memo: 'Payout from airdrop',
-      },
+      notSentLog.token_id,
+      notSentLog.uid,
+      notSentLog.amount,
+      `Payout from Airdrop(cashtag: ${notSentLog.cashtag})`,
       this.middlemanAccessToken,
     );
     notSentLog.status = 'ok';

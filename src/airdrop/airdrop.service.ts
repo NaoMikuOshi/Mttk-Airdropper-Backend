@@ -56,9 +56,25 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
       airdropResult,
     );
   }
-  async transfer(reqBody, access_token: string) {
-    console.log('transfer start params: ', reqBody, access_token);
-    const { tokenId, to, amount, memo } = reqBody;
+
+  async transfer(
+    tokenId: number,
+    to: number,
+    amount: number,
+    memo: string,
+    access_token: string,
+  ) {
+    console.log(
+      'transfer start params: ',
+      {
+        tokenId,
+        to,
+        amount,
+        memo,
+      },
+      access_token,
+    );
+    // const { tokenId, to, amount, memo } = reqBody;
     return this.httpService
       .post(
         '/minetoken/transfer',
@@ -77,14 +93,12 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
       .toPromise()
       .then((res) => res.data);
   }
+
   async airdrop(reqBody, access_token: string) {
     const { tokenId, amount, title } = reqBody;
     const memo = title;
     const to = Number(process.env.TEMP_UID);
-    const result = await this.transfer(
-      { tokenId, to, amount, memo },
-      access_token,
-    );
+    const result = await this.transfer(tokenId, to, amount, memo, access_token);
     console.log('transfer end result: ', result);
     return result;
   }
