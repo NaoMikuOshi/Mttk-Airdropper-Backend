@@ -42,8 +42,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     return nanoid();
   }
 
-  async claim(reqBody) {
-    const { to, amount, memo, cashtag } = reqBody;
+  async claim(to: number, amount: number, cashtag: string) {
     const airdropResult = await this.repo.findOne({ cashtag });
     const tokenId = airdropResult.token_id;
 
@@ -53,7 +52,6 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
         cashtag,
         amount,
         token_id: tokenId,
-        tx_hash: null,
       },
       airdropResult,
     );

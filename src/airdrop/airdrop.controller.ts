@@ -108,7 +108,7 @@ export class AirdropController implements CrudController<AirdropEvent> {
 
     // to参数需要从accessToken中解出来
     const currentUser = await this.authService.getUser(accessToken);
-    const to = currentUser.data.id;
+    const to = currentUser.data.id as number;
 
     // 判断用户是否领取过
     const alreadyGet = await this.service.alreadyGetAirdrop(to, cashtag);
@@ -122,15 +122,7 @@ export class AirdropController implements CrudController<AirdropEvent> {
     } else {
       // const middleAccessToken = await this.authService.getAccessToken();
       // console.log(middleAccessToken);
-      const result = await this.service.claim(
-        {
-          ...dto,
-          cashtag,
-          to,
-          amount,
-        },
-        // middleAccessToken.data,
-      );
+      const result = await this.service.claim(to, amount, cashtag);
       return result;
     }
   }
