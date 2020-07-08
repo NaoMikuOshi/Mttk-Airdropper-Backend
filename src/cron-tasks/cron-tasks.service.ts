@@ -53,7 +53,7 @@ export class CronTasksService {
       notSentLog.token_id,
       notSentLog.uid,
       notSentLog.amount,
-      `Payout from Airdrop(cashtag: ${notSentLog.cashtag})`,
+      `Payout from Airdrop(cashtag: $${notSentLog.cashtag})`,
       this.middlemanAccessToken,
     );
     notSentLog.status = 'ok';
