@@ -43,16 +43,9 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
   }
 
   async claim(reqBody) {
-    // @todo: needs a rewrite, use scheduled tasks to avoid transaction have race condition
     const { to, amount, memo, cashtag } = reqBody;
     const airdropResult = await this.repo.findOne({ cashtag });
     const tokenId = airdropResult.token_id;
-    // We will put this in queue and run by cron, not here
-    // const result = await this.transfer(
-    //   { tokenId, to, amount, memo },
-    //   access_token,
-    // );
-    // Disabled transfer in claim()
 
     return this.claimService.createClaim(
       {
@@ -97,7 +90,19 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     console.log('transfer end result: ', result);
     return result;
   }
-  async getAirdropAmount(cashtag): Promise<Number> {
+
+  async stopAirdrop(cashtag: string) {
+    const airdrop = await this.repo.findOne({ cashtag });
+    airdrop.status = 'stopped';
+    return this.repo.save(airdrop);
+  }
+
+  async isAirDropFinished(cashtag: string) {
+    const airdrop = await this.repo.findOne({ cashtag });
+    return airdrop.claimed >= airdrop.quantity;
+  }
+
+  async getAirdropAmount(cashtag: string): Promise<Number> {
     /* const claimLogRepoResult = await this.claimLogRepo
     .createQueryBuilder('claimLog')
     .select(' SUM(amount) as total ')
@@ -106,13 +111,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     .getMany(); */
     const airdropResult = await this.repo.findOne({ cashtag });
     if (!airdropResult) return 0;
-    const claimLogResult = await this.repo.query(
-      'SELECT SUM(amount) as total FROM ' +
-        process.env.DB_SCHEMA +
-        '.claim_log WHERE cashtag = $1;',
-      [cashtag],
-    );
-    const claimTotal = claimLogResult[0].total || 0;
+    const claimTotal = await this.claimService.getTotalClaimedOf(cashtag);
     const { amount, quantity } = airdropResult;
     if (amount <= claimTotal) return 0;
     const equally = Math.floor(amount / quantity);
@@ -120,10 +119,6 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     const rest = parseFloat(d_amount.minus(claimTotal).toString());
     if (rest < equally) return rest;
     return equally;
-  }
-  // @todo: We are not implement this logic for now, will do this later;
-  async isAirdropExpired(cashtag: string): Promise<Boolean> {
-    return Promise.resolve(false);
   }
   async alreadyGetAirdrop(uid: number, cashtag: string) {
     const airdropResult = await this.getClaimLogForUser(uid, cashtag);

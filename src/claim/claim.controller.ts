@@ -10,4 +10,10 @@ export class ClaimController {
     const claimLogs = await this.service.getClaimLogs(cashtag);
     return { claimLogs };
   }
+
+  @Get('/:cashtag/total')
+  async getTotalOf(@Param('cashtag') cashtag: string) {
+    const total = await this.service.getTotalClaimedOf(cashtag);
+    return { total };
+  }
 }

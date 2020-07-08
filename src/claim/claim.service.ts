@@ -42,4 +42,21 @@ export class ClaimService extends TypeOrmCrudService<ClaimLog> {
       order: { created_at: 'DESC' },
     });
   }
+
+  getClaimsOf(cashtag: string) {
+    return this.repo.find({ cashtag });
+  }
+
+  getCountOf(cashtag: string) {
+    return this.repo.count({ cashtag });
+  }
+
+  async getTotalClaimedOf(cashtag: string) {
+    const { total } = await this.repo
+      .createQueryBuilder('claim_log')
+      .select('SUM(amount) as total')
+      .where('cashtag = :cashtag', { cashtag })
+      .getRawOne();
+    return Number(total);
+  }
 }
