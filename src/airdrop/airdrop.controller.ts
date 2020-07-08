@@ -102,20 +102,19 @@ export class AirdropController implements CrudController<AirdropEvent> {
     @Headers('x-access-token') accessToken: string,
     @Body() dto,
   ) {
-    // 判断项目是否过期
-    const isExpired = await this.service.isAirdropExpired(cashtag);
-    if (isExpired) {
-      throw new BadRequestException('Airdrop Expired');
-    }
+    // Check if airdrop finished
+    const isAirDropFinished = await this.service.isAirDropFinished(cashtag);
+    if (isAirDropFinished) throw new BadRequestException('Airdrop Finished');
+
     // to参数需要从accessToken中解出来
     const currentUser = await this.authService.getUser(accessToken);
     const to = currentUser.data.id;
 
     // 判断用户是否领取过
     const alreadyGet = await this.service.alreadyGetAirdrop(to, cashtag);
-    if (alreadyGet) {
-      throw new BadRequestException('Already Claim Airdrop');
-    }
+    if (alreadyGet)
+      throw new BadRequestException('You already claimed this Airdrop');
+
     // 均分获取amount
     const amount = await this.service.getAirdropAmount(cashtag);
     if (amount <= 0) {
