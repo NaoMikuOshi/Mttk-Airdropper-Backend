@@ -2,6 +2,7 @@ import {
   HttpService,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -14,6 +15,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
+  private readonly logger = new Logger(AirdropService.name);
   constructor(
     @InjectRepository(AirdropEvent)
     readonly repo: Repository<AirdropEvent>,
@@ -64,17 +66,15 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     memo: string,
     access_token: string,
   ) {
-    console.log(
-      'transfer start params: ',
-      {
-        tokenId,
-        to,
-        amount,
-        memo,
-      },
-      access_token,
+    this.logger.log(
+      'transfer start params: ' +
+        JSON.stringify({
+          tokenId,
+          to,
+          amount,
+          memo,
+        }),
     );
-    // const { tokenId, to, amount, memo } = reqBody;
     return this.httpService
       .post(
         '/minetoken/transfer',
@@ -99,7 +99,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     const memo = title;
     const to = Number(process.env.TEMP_UID);
     const result = await this.transfer(tokenId, to, amount, memo, access_token);
-    console.log('transfer end result: ', result);
+    this.logger.log('transfer end result: ' + JSON.stringify(result));
     return result;
   }
 
