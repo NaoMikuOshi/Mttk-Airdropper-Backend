@@ -36,7 +36,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     airdropItem.quantity = quantity;
     return this.repo.save(airdropItem);
   }
-  async genCharacterNumber(length) {
+  async genCharacterNumber(length: number) {
     const nanoid = customAlphabet(
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
       length,
@@ -140,7 +140,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
   }
 
   // 获取用户余额
-  async balance(tokenId, access_token: string) {
+  async balance(tokenId: number, access_token: string) {
     return this.httpService
       .get('/minetoken/balance', {
         params: { tokenId },
