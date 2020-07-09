@@ -12,6 +12,7 @@ import { ClaimService } from '../claim/claim.service';
 import { Decimal } from 'decimal.js';
 import * as moment from 'moment';
 import { Repository } from 'typeorm';
+import { CreateAirdropDto } from './dto/create-airdrop.dto';
 
 @Injectable()
 export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
@@ -24,18 +25,35 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
   ) {
     super(repo);
   }
-  async createOne(req, dto) {
-    const { title, tokenId, amount, quantity, owner } = dto;
+
+  // async createOne(req, dto) {
+  //   const { title, tokenId, amount, quantity, type } = dto;
+  //   let airdropItem = new AirdropEvent();
+  //   const cashtag = await this.genCharacterNumber(12);
+  //   airdropItem.owner = owner;
+  //   airdropItem.cashtag = cashtag;
+  //   airdropItem.title = title;
+  //   airdropItem.token_id = tokenId;
+  //   airdropItem.type = type;
+  //   airdropItem.amount = amount;
+  //   airdropItem.quantity = quantity;
+  //   return this.repo.save(airdropItem);
+  // }
+
+  async createAirdrop(dto: CreateAirdropDto, owner: number) {
+    const { title, tokenId, amount, quantity, type } = dto;
     let airdropItem = new AirdropEvent();
-    const cashtag = await this.genCharacterNumber(12);
+    const ramdomCashtag = await this.genCharacterNumber(12);
     airdropItem.owner = owner;
-    airdropItem.cashtag = cashtag;
+    airdropItem.cashtag = dto.cashtag || ramdomCashtag;
     airdropItem.title = title;
     airdropItem.token_id = tokenId;
+    airdropItem.type = type;
     airdropItem.amount = amount;
     airdropItem.quantity = quantity;
     return this.repo.save(airdropItem);
   }
+
   async genCharacterNumber(length: number) {
     const nanoid = customAlphabet(
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
@@ -101,6 +119,11 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     const result = await this.transfer(tokenId, to, amount, memo, access_token);
     this.logger.log('transfer end result: ' + JSON.stringify(result));
     return result;
+  }
+
+  async isExist(cashtag: string) {
+    const airdropCount = await this.repo.count({ cashtag });
+    return airdropCount !== 0;
   }
 
   async stopAirdrop(cashtag: string) {

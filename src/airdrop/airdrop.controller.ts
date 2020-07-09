@@ -4,12 +4,10 @@ import {
   Body,
   Headers,
   Param,
-  NotImplementedException,
   Get,
-  Put,
-  ConflictException,
   UseGuards,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { AirdropService } from './airdrop.service';
 import { AuthService } from '../auth/auth.service';
@@ -62,20 +60,23 @@ export class AirdropController implements CrudController<AirdropEvent> {
   @UseGuards(AuthGuard)
   @Override()
   async createOne(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto,
+    @ParsedBody() dto: CreateAirdropDto,
     @Headers('x-access-token') accessToken: string,
   ) {
+    const isCashtagExist = await this.service.isExist(dto.cashtag);
+    if (isCashtagExist)
+      throw new ConflictException(
+        'Cashtag already exist, please try another one.',
+      );
     const balance = await this.service.balance(dto.tokenId, accessToken);
-    if (balance.code != 0 || balance.data <= 0) {
+    if (balance.code !== 0 || balance.data <= 0)
       throw new BadRequestException('token not exist or balance = 0');
-    }
     // to参数需要从accessToken中解出来
     const currentUser = await this.authService.getUser(accessToken);
     const owner = currentUser.data.id;
     const result = await this.service.airdrop(dto, accessToken);
     if (result.code === 0) {
-      return this.base.createOneBase(req, { ...dto, type: 'equal', owner });
+      return this.service.createAirdrop(dto, owner);
     } else {
       throw new BadRequestException();
     }
