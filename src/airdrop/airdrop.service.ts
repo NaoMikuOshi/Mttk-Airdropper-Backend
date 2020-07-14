@@ -67,7 +67,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
    * @param remaining the remaining
    * @param balance the balance that generate random amount
    */
-  getRamdonAmount(remaining: number, balance: number) {
+  getRandomAmount(remaining: number, balance: number) {
     if (remaining === 1) return balance;
     const max = balance - remaining;
     const min = 1;
