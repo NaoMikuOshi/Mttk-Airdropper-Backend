@@ -62,6 +62,18 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     return nanoid();
   }
 
+  /**
+   * Get a random amout from input for LuckyMoney mode
+   * @param remaining the remaining
+   * @param balance the balance that generate random amount
+   */
+  getRamdonAmount(remaining: number, balance: number) {
+    if (remaining === 1) return balance;
+    const max = balance - remaining;
+    const min = 1;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   async claim(to: number, amount: number, cashtag: string) {
     const airdropResult = await this.repo.findOne({ cashtag });
     const tokenId = airdropResult.token_id;
