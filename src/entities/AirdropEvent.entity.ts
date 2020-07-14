@@ -47,4 +47,7 @@ export class AirdropEvent {
 
   @Column({ default: 'active' })
   status: 'active' | 'stopped' | 'finished';
+
+  @Column({ default: 0 })
+  balance: number;
 }
