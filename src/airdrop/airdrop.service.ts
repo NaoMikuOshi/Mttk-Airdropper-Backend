@@ -3,6 +3,8 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  BadRequestException,
+  NotImplementedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -86,6 +88,39 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
         token_id: tokenId,
       },
       airdropResult,
+    );
+  }
+
+  async handleClaimAirdrop(cashtag: string, to: number) {
+    const airdropResult = await this.repo.findOne({ cashtag });
+    if (airdropResult.type === 'equal') {
+      return this.handleEqualAirDrop(cashtag, to);
+    } else if (airdropResult.type === 'random') {
+      // redpack mode
+      return this.handleLuckyAirDrop(cashtag, to);
+    } else {
+      throw new NotImplementedException(
+        'This type of airdrop is still in development, please contract us for support',
+      );
+    }
+  }
+
+  async handleEqualAirDrop(cashtag: string, to: number) {
+    const amount = await this.getAirdropAmount(cashtag);
+    if (amount <= 0) {
+      throw new BadRequestException('Airdrop Amount = 0');
+    }
+    return this.claim(to, amount, cashtag);
+  }
+
+  async handleLuckyAirDrop(cashtag: string, to: number) {
+    // const amount = await this.getAirdropAmount(cashtag);
+    // if (amount <= 0) {
+    //   throw new BadRequestException('Airdrop Amount = 0');
+    // }
+    // return this.claim(to, amount, cashtag);
+    throw new NotImplementedException(
+      'LuckyMode is still waiting for actual implementation',
     );
   }
 

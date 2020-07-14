@@ -13,7 +13,7 @@ export class AirdropEvent {
   id: number;
 
   @Column({ default: 'equal' })
-  type: string | 'equal' | 'random';
+  type: 'equal' | 'random';
 
   @Column()
   title: string;
