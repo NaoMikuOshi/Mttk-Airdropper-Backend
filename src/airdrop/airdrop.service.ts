@@ -52,6 +52,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     airdropItem.token_id = tokenId;
     airdropItem.type = type;
     airdropItem.amount = amount;
+    airdropItem.balance = amount;
     airdropItem.quantity = quantity;
     return this.repo.save(airdropItem);
   }
@@ -71,7 +72,9 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
    */
   getRandomAmount(remaining: number, balance: number) {
     if (remaining === 1) return balance;
-    const max = balance - remaining;
+    const equallyDivided = Math.floor(balance / remaining);
+    // Range is [1, equallyDivided * 2]
+    const max = equallyDivided * 2;
     const min = 1;
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -114,14 +117,15 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
   }
 
   async handleLuckyAirDrop(cashtag: string, to: number) {
-    // const amount = await this.getAirdropAmount(cashtag);
-    // if (amount <= 0) {
-    //   throw new BadRequestException('Airdrop Amount = 0');
-    // }
-    // return this.claim(to, amount, cashtag);
-    throw new NotImplementedException(
-      'LuckyMode is still waiting for actual implementation',
-    );
+    const event = await this.repo.findOne({ cashtag });
+    const remaining = event.quantity - event.claimed;
+    if (remaining <= 0 || event.balance <= 0) {
+      throw new BadRequestException(
+        'Airdrop is finished, there are no remaining slot for you. Sorry.',
+      );
+    }
+    const amount = this.getRandomAmount(remaining, event.balance);
+    return this.claim(to, amount, cashtag);
   }
 
   async transfer(
