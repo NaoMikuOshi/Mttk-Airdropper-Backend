@@ -116,15 +116,6 @@ export class AirdropController implements CrudController<AirdropEvent> {
     if (alreadyGet)
       throw new BadRequestException('You already claimed this Airdrop');
 
-    // 均分获取amount
-    const amount = await this.service.getAirdropAmount(cashtag);
-    if (amount <= 0) {
-      throw new BadRequestException('Airdrop Amount = 0');
-    } else {
-      // const middleAccessToken = await this.authService.getAccessToken();
-      // console.log(middleAccessToken);
-      const result = await this.service.claim(to, amount, cashtag);
-      return result;
-    }
+    return this.service.handleClaimAirdrop(cashtag, to);
   }
 }

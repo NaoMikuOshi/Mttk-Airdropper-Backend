@@ -1,4 +1,10 @@
-import { HttpService, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpService,
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { ClaimLog } from '../entities/ClaimLog.entity';
@@ -17,9 +23,11 @@ import { CreateClaimDto } from './dto/CreateClaim';
 
 @Injectable()
 export class ClaimService extends TypeOrmCrudService<ClaimLog> {
+  private readonly logger = new Logger(ClaimService.name);
+
   constructor(
     @InjectRepository(ClaimLog) repo: Repository<ClaimLog>,
-    @InjectRepository(ClaimLog)
+    @InjectRepository(AirdropEvent)
     private readonly aeRepo: Repository<AirdropEvent>,
     private readonly httpService: HttpService,
   ) {
@@ -34,6 +42,16 @@ export class ClaimService extends TypeOrmCrudService<ClaimLog> {
     item.token_id = dto.token_id;
     item.tx_hash = null;
     item.event = event;
+    event.balance = event.balance - dto.amount;
+    if (event.balance < 0) {
+      this.logger.error('Error when handling claim request');
+      this.logger.error('CreateClaimDto: ' + JSON.stringify(dto));
+      this.logger.error('AirdropEvent: ' + JSON.stringify(event));
+      throw new BadRequestException(
+        `System error when create claim for $${dto.cashtag}`,
+      );
+    }
+    await this.aeRepo.save(event);
     return this.repo.save(item);
   }
 

@@ -13,7 +13,7 @@ export class AirdropEvent {
   id: number;
 
   @Column({ default: 'equal' })
-  type: string | 'equal' | 'random';
+  type: 'equal' | 'random';
 
   @Column()
   title: string;
@@ -47,4 +47,7 @@ export class AirdropEvent {
 
   @Column({ default: 'active' })
   status: 'active' | 'stopped' | 'finished';
+
+  @Column({ default: 0 })
+  balance: number;
 }
