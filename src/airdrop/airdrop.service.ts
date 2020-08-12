@@ -5,6 +5,7 @@ import {
   Logger,
   BadRequestException,
   NotImplementedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -55,6 +56,17 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     airdropItem.balance = amount;
     airdropItem.quantity = quantity;
     return this.repo.save(airdropItem);
+  }
+
+  async ownerOf(cashtag: string) {
+    const airdrop = await this.repo.findOne({ cashtag });
+    if (!airdrop) throw new NotFoundException('No Such Airdrop exist');
+    return airdrop.owner;
+  }
+
+  async isOwnerOf(cashtag: string, uid: number): Promise<boolean> {
+    const owner = await this.ownerOf(cashtag);
+    return owner === uid;
   }
 
   async genCharacterNumber(length: number) {
@@ -224,5 +236,16 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
       })
       .toPromise()
       .then((res) => res.data);
+  }
+
+  async handleStopAirdrop(cashtag: string, accessToken: string) {
+    const event = await this.repo.findOne({ cashtag });
+    return this.transfer(
+      event.token_id,
+      event.owner,
+      event.balance,
+      `Stop airdrop of $${cashtag}`,
+      accessToken,
+    );
   }
 }
