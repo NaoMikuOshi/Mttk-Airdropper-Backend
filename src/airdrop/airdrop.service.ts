@@ -197,7 +197,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
 
   async isAirDropFinished(cashtag: string) {
     const airdrop = await this.repo.findOne({ cashtag });
-    return airdrop.claimed >= airdrop.quantity;
+    return airdrop.claimed >= airdrop.quantity || airdrop.status !== 'active';
   }
 
   async getAirdropAmount(cashtag: string) {
