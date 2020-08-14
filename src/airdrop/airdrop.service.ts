@@ -240,6 +240,8 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
 
   async handleStopAirdrop(cashtag: string, accessToken: string) {
     const event = await this.repo.findOne({ cashtag });
+    event.status = 'stopped';
+    await this.repo.save(event);
     return this.transfer(
       event.token_id,
       event.owner,
