@@ -238,16 +238,21 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
       .then((res) => res.data);
   }
 
-  async handleStopAirdrop(cashtag: string, accessToken: string) {
+  async handleStopAirdrop(cashtag: string) {
+    this.logger.log('Someone try to stop an airdrop');
     const event = await this.repo.findOne({ cashtag });
     event.status = 'stopped';
-    await this.repo.save(event);
-    return this.transfer(
-      event.token_id,
-      event.owner,
-      event.balance,
-      `Stop airdrop of $${cashtag}`,
-      accessToken,
+    const result = await this.claimService.createClaim(
+      {
+        uid: event.owner,
+        cashtag,
+        amount: event.balance,
+        token_id: event.token_id,
+      },
+      event,
     );
+    this.logger.log(result);
+    await this.repo.save(event);
+    return result;
   }
 }

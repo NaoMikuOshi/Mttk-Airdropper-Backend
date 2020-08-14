@@ -144,7 +144,7 @@ export class AirdropController implements CrudController<AirdropEvent> {
       );
 
     // is owner check passed now.
-    const result = await this.service.handleStopAirdrop(cashtag, accessToken);
+    const result = await this.service.handleStopAirdrop(cashtag);
     return { result };
   }
 }
