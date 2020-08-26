@@ -5,6 +5,7 @@ import {
   Logger,
   BadRequestException,
   NotImplementedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -55,6 +56,17 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
     airdropItem.balance = amount;
     airdropItem.quantity = quantity;
     return this.repo.save(airdropItem);
+  }
+
+  async ownerOf(cashtag: string) {
+    const airdrop = await this.repo.findOne({ cashtag });
+    if (!airdrop) throw new NotFoundException('No Such Airdrop exist');
+    return airdrop.owner;
+  }
+
+  async isOwnerOf(cashtag: string, uid: number): Promise<boolean> {
+    const owner = await this.ownerOf(cashtag);
+    return owner === uid;
   }
 
   async genCharacterNumber(length: number) {
@@ -185,7 +197,7 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
 
   async isAirDropFinished(cashtag: string) {
     const airdrop = await this.repo.findOne({ cashtag });
-    return airdrop.claimed >= airdrop.quantity;
+    return airdrop.claimed >= airdrop.quantity || airdrop.status !== 'active';
   }
 
   async getAirdropAmount(cashtag: string) {
@@ -224,5 +236,23 @@ export class AirdropService extends TypeOrmCrudService<AirdropEvent> {
       })
       .toPromise()
       .then((res) => res.data);
+  }
+
+  async handleStopAirdrop(cashtag: string) {
+    this.logger.log('Someone try to stop an airdrop');
+    const event = await this.repo.findOne({ cashtag });
+    event.status = 'stopped';
+    const result = await this.claimService.createClaim(
+      {
+        uid: event.owner,
+        cashtag,
+        amount: event.balance,
+        token_id: event.token_id,
+      },
+      event,
+    );
+    this.logger.log(result);
+    await this.repo.save(event);
+    return result;
   }
 }

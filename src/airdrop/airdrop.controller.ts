@@ -8,6 +8,8 @@ import {
   UseGuards,
   BadRequestException,
   ConflictException,
+  NotImplementedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AirdropService } from './airdrop.service';
 import { AuthService } from '../auth/auth.service';
@@ -117,5 +119,32 @@ export class AirdropController implements CrudController<AirdropEvent> {
       throw new BadRequestException('You already claimed this Airdrop');
 
     return this.service.handleClaimAirdrop(cashtag, to);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/:cashtag/stop')
+  async stop(
+    @Param('cashtag') cashtag: string,
+    @Headers('x-access-token') accessToken: string,
+  ) {
+    // Check if airdrop finished
+    const isAirDropFinished = await this.service.isAirDropFinished(cashtag);
+    if (isAirDropFinished)
+      throw new BadRequestException(
+        'Airdrop was finished, no need to stop a finished airdrop',
+      );
+
+    // 获取用户信息
+    const currentUser = await this.authService.getUser(accessToken);
+    const uid = currentUser.data.id as number;
+    const isOwner = await this.service.isOwnerOf(cashtag, uid);
+    if (!isOwner)
+      throw new ForbiddenException(
+        "You are not the owner of this event, so you can't do that.",
+      );
+
+    // is owner check passed now.
+    const result = await this.service.handleStopAirdrop(cashtag);
+    return { result };
   }
 }
