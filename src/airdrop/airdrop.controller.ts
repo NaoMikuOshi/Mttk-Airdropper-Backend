@@ -73,6 +73,12 @@ export class AirdropController implements CrudController<AirdropEvent> {
       throw new ConflictException(
         'Cashtag already exist, please try another one.',
       );
+
+    if (isNaN(dto.quantity))
+      throw new BadRequestException('Quantity must be a number');
+    if (dto.quantity > 128)
+      throw new BadRequestException('Quantity must be <= 128');
+
     const balance = await this.service.balance(dto.tokenId, accessToken);
     if (balance.code !== 0 || balance.data <= 0)
       throw new BadRequestException('token not exist or balance = 0');
