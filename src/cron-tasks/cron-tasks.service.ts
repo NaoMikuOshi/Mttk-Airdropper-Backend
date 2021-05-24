@@ -74,9 +74,9 @@ export class CronTasksService {
       (event) => event.quantity == event.claimed,
     );
     if (finishedEvents.length === 0) return;
-    const ableToUpdate = finishedEvents.map((e) => ({
+    const ableToUpdate: AirdropEvent[] = finishedEvents.map((e) => ({
       ...e,
-      status: 'finished' as 'finished',
+      status: 'finished',
     }));
     await this.aeRepo.save(ableToUpdate);
     this.logger.log(
