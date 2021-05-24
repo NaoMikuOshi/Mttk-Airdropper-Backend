@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { AirdropService } from './airdrop.service';
 import { AuthService } from '../auth/auth.service';
+import { verify } from 'hcaptcha';
 import { CreateAirdropDto } from './dto/create-airdrop.dto';
 import { AirdropEvent } from '../entities/AirdropEvent.entity';
 import {
@@ -27,6 +28,8 @@ import {
 // import { LocalAuthGuard } from '../auth/guards/local-auth.guard';
 // import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
+
+require('dotenv').config();
 
 // @todo: wait for matataki have a virtual account API to continue...
 @Crud({
@@ -105,6 +108,13 @@ export class AirdropController implements CrudController<AirdropEvent> {
     @Headers('x-access-token') accessToken: string,
     @Body() dto,
   ) {
+    // check captcha
+    const secret = process.env.HCaptchaSerect;
+    const token = dto.captcha.token;
+
+    const result = await verify(secret, token);
+
+    if (!result.success) throw new BadRequestException('Bad captcha');
     // Check if airdrop finished
     const isAirDropFinished = await this.service.isAirDropFinished(cashtag);
     if (isAirDropFinished) throw new BadRequestException('Airdrop Finished');
