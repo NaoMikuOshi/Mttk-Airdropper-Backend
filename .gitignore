@@ -5,6 +5,7 @@
 # Env
 .env
 .env.production
+.env.test
 
 # Logs
 logs
