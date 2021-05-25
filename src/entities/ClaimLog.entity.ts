@@ -13,7 +13,7 @@ export class ClaimLog {
   cashtag: string;
 
   @Column({ default: 'pending' })
-  status: 'pending' | 'ok';
+  status: 'pending' | 'ok' | 'error';
 
   @Column()
   amount: number;
