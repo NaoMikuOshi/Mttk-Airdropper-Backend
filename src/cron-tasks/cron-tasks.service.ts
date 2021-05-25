@@ -71,10 +71,12 @@ export class CronTasksService {
       );
     } catch (error) {
       this.logger.error(`Bad Transfer when handling ${notSentLog.id}`);
-      this.notificationService.pushTextToDingTalk(`发放空投失败 \n
-      交易详情: \n 发奖到 UID：${notSentLog.uid} \n 金额：${
-        notSentLog.amount / 10 ** 4
-      }  \n 币种 TID：${notSentLog.token_id}`);
+      this.notificationService.pushTextToDingTalk(`发放空投失败
+      交易详情:
+      发奖到 UID：${notSentLog.uid}
+      金额：${notSentLog.amount / 10 ** 4}
+      币种 TID：${notSentLog.token_id}
+      已跳过，请及时处理。`);
       notSentLog.status = 'error';
       await this.claimRepo.save(notSentLog);
     }
