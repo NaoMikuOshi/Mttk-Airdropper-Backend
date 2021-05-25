@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { AirdropService } from 'src/airdrop/airdrop.service';
 import { AuthService } from 'src/auth/auth.service';
 import { AirdropEvent } from 'src/entities/AirdropEvent.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class CronTasksService {
@@ -17,6 +18,7 @@ export class CronTasksService {
     private readonly aeRepo: Repository<AirdropEvent>,
     private readonly airdropService: AirdropService,
     private readonly authService: AuthService,
+    private readonly notificationService: NotificationService,
   ) {}
   private readonly logger = new Logger(CronTasksService.name);
 
@@ -52,19 +54,30 @@ export class CronTasksService {
       );
       return;
     }
-    const result = await this.airdropService.transfer(
-      notSentLog.token_id,
-      notSentLog.uid,
-      notSentLog.amount,
-      `Payout from Airdrop(cashtag: $${notSentLog.cashtag})`,
-      this.middlemanAccessToken,
-    );
-    notSentLog.status = 'ok';
-    notSentLog.tx_hash = result.data.tx_hash;
-    this.claimRepo.save(notSentLog);
-    this.logger.log(
-      `Claim transaction ${notSentLog.id} is now sent, txHash is ${notSentLog.tx_hash}`,
-    );
+
+    try {
+      const result = await this.airdropService.transfer(
+        notSentLog.token_id,
+        notSentLog.uid,
+        notSentLog.amount,
+        `Payout from Airdrop(cashtag: $${notSentLog.cashtag})`,
+        this.middlemanAccessToken,
+      );
+      notSentLog.status = 'ok';
+      notSentLog.tx_hash = result.data.tx_hash;
+      await this.claimRepo.save(notSentLog);
+      this.logger.log(
+        `Claim transaction ${notSentLog.id} is now sent, txHash is ${notSentLog.tx_hash}`,
+      );
+    } catch (error) {
+      this.logger.error(`Bad Transfer when handling ${notSentLog.id}`);
+      this.notificationService.pushTextToDingTalk(`发放空投失败 \n
+      交易详情: \n 发奖到 UID：${notSentLog.uid} \n 金额：${
+        notSentLog.amount / 10 ** 4
+      }  \n 币种 TID：${notSentLog.token_id}`);
+      notSentLog.status = 'error';
+      await this.claimRepo.save(notSentLog);
+    }
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
